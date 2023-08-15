@@ -28,7 +28,9 @@ namespace PlantsnNutritionRebalance.Scripts
             else
             {
                 GasMixture gasMixture = GasMixtureHelper.Create();
-                gasMixture.Add(new Mole(Chemistry.GasType.Water, (__result / 100) * PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage, 0f));
+                float transpirationvalue = (__result / 100) * PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage;
+                gasMixture.Add(new Mole(Chemistry.GasType.Water, transpirationvalue * 0.1f, 0f));
+                gasMixture.Add(new Mole(Chemistry.GasType.Steam, transpirationvalue * 0.9f, 0f));
                 gasMixture.AddEnergy(__instance.ParentTray.WaterAtmosphere.Temperature * gasMixture.HeatCapacity);
                 __instance.BreathingAtmosphere.Add(gasMixture);
             }
