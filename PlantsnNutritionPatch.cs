@@ -24,40 +24,40 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPostfix]
         public static void TakePlantDrinkPatch(Plant __instance, ref float __result)
         {
-            if (PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage == 0)
+            if (ConfigFile.PlantWaterTranspirationPercentage == 0)
                 return;
             else
             {
-                
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> HasAtmosphere " + __instance.ReferenceId +" - "+ __instance.HasAtmosphere);
+
+                ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> HasAtmosphere " + __instance.ReferenceId +" - "+ __instance.HasAtmosphere);
                 if (__instance.ThermalAtmosphere!= null) {
-                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> Temperature " + __instance.ReferenceId + " - " + __instance.ThermalAtmosphere.Temperature);
-                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PressureGassesAndLiquids " + __instance.ReferenceId + " - " + __instance.ThermalAtmosphere.PressureGassesAndLiquids);
+                    ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> Temperature " + __instance.ReferenceId + " - " + __instance.ThermalAtmosphere.Temperature);
+                    ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PressureGassesAndLiquids " + __instance.ReferenceId + " - " + __instance.ThermalAtmosphere.PressureGassesAndLiquids);
                 }
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PlantStatus.TemperatureEfficiency " + __instance.ReferenceId + " - " + __instance.PlantStatus.TemperatureEfficiency); //curva montada no jogo em porcentagem 0 ~ 1 de eficiencia em presao adequada
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PlantStatus.PressureEfficiency  " + __instance.ReferenceId + " - " + __instance.PlantStatus.PressureEfficiency); //curva montada no jogo em porcentagem 0 ~ 1 de eficiencia em presao adequada
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere PressureGassesAndLiquidsInPa " + __instance.ReferenceId + " - " + __instance.BreathingAtmosphere.PressureGassesAndLiquidsInPa);
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere Temperature " + __instance.ReferenceId + " - " + __instance.BreathingAtmosphere.Temperature);
+                ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PlantStatus.TemperatureEfficiency " + __instance.ReferenceId + " - " + __instance.PlantStatus.TemperatureEfficiency); //curva montada no jogo em porcentagem 0 ~ 1 de eficiencia em presao adequada
+                ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PlantStatus.PressureEfficiency  " + __instance.ReferenceId + " - " + __instance.PlantStatus.PressureEfficiency); //curva montada no jogo em porcentagem 0 ~ 1 de eficiencia em presao adequada
+                ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere PressureGassesAndLiquidsInPa " + __instance.ReferenceId + " - " + __instance.BreathingAtmosphere.PressureGassesAndLiquidsInPa);
+                ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere Temperature " + __instance.ReferenceId + " - " + __instance.BreathingAtmosphere.Temperature);
 
                 if (__instance.InternalAtmosphere != null) {
-                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> TotalMolesLiquids " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.TotalMolesLiquids);
-                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> TotalMolesGases " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.TotalMolesGases);
-                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> Pressure " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.Pressure(MatterState.All));
+                    ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> TotalMolesLiquids " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.TotalMolesLiquids);
+                    ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> TotalMolesGases " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.TotalMolesGases);
+                    ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> Pressure " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.Pressure(MatterState.All));
                 }
                 float TQ = 0.5f;
                 float midealtemp = __instance.lifeRequirements.MaxGrowPressure().CurrentValue;
                 float midealpresure = __instance.lifeRequirements.MinGrowTemperatureK().CurrentValue;
-                float waterporcentage = (PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage/100f) * 0.9f;
+                float waterporcentage = (ConfigFile.PlantWaterTranspirationPercentage/100f) * 0.9f;
                 float y1 = Mathf.Pow(Mathf.Pow(TQ, -1 / 10), 
                     ((__instance.BreathingAtmosphere.Temperature - midealtemp) 
                     / (Mathf.Pow((__instance.BreathingAtmosphere.Temperature - midealtemp) , -1) 
-                    * PlantsnNutritionRebalancePlugin.PlantWatercurve)));
+                    * ConfigFile.PlantWatercurve)));
                 float y2 = Mathf.Pow(Mathf.Pow(TQ, -1 / 10), 
                     ((__instance.BreathingAtmosphere.PressureGassesAndLiquidsInPa - midealpresure) 
                     / (Mathf.Pow((__instance.BreathingAtmosphere.PressureGassesAndLiquidsInPa - midealpresure) , -1)
-                    * PlantsnNutritionRebalancePlugin.PlantWatercurve)));
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere y1 Temperature" + __instance.ReferenceId + " - " + y1);
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere y2 PressureGassesAndLiquidsInPa" + __instance.ReferenceId + " - " + y2);
+                    * ConfigFile.PlantWatercurve)));
+                ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere y1 Temperature" + __instance.ReferenceId + " - " + y1);
+                ModLog.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere y2 PressureGassesAndLiquidsInPa" + __instance.ReferenceId + " - " + y2);
 
 
                 GasMixture gasMixture = GasMixtureHelper.Create();
@@ -81,7 +81,7 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPrefix]
         public static bool PatchAtmosphericFog(AtmosphericFog __instance, ref bool __result)
         {
-            if (PlantsnNutritionRebalancePlugin.AtmosphereFogThreshold == 0f)
+            if (ConfigFile.AtmosphereFogThreshold == 0f)
                 return true; //user don't want to change the Fog Threshold, so keep the Vanilla method
             else
             {
@@ -90,7 +90,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 // Get the value of the Atmosphere property for this instance of AtmosphericFog
                 var atmosphere = (Atmosphere)atmosphereProp.GetValue(__instance);
                 // Change the AtmosphereFog Moles threshold:
-                __result = atmosphere != null && atmosphere.GasMixture.TotalMolesLiquids > PlantsnNutritionRebalancePlugin.AtmosphereFogThreshold && atmosphere.Mode == AtmosphereHelper.AtmosphereMode.World;
+                __result = atmosphere != null && atmosphere.GasMixture.TotalMolesLiquids > ConfigFile.AtmosphereFogThreshold && atmosphere.Mode == AtmosphereHelper.AtmosphereMode.World;
                 return false; // then skip the vanilla method
             }
         }
@@ -105,9 +105,9 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPostfix]
         public static void WaterPerTickPatch(ref float __result)
         {
-            __result *= PlantsnNutritionRebalancePlugin.PlantWaterConsumptionMultiplier;
-            if (__result > PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit)
-                __result = PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit;
+            __result *= ConfigFile.PlantWaterConsumptionMultiplier;
+            if (__result > ConfigFile.PlantWaterConsumptionLimit)
+                __result = ConfigFile.PlantWaterConsumptionLimit;
         }
     }
 
@@ -154,7 +154,7 @@ namespace PlantsnNutritionRebalance.Scripts
         static public void MaxNutritionPatch(ref float __result)
         {
             // Adjusts the max food of the character:
-            __result = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MF"].ToString());
+            __result = float.Parse(ConfigFile.fConfigsFood["MF"].ToString());
         }
 
         // Adjusts the HungerRate based on the world difficulty and changes the damage system for Starvation
@@ -183,7 +183,7 @@ namespace PlantsnNutritionRebalance.Scripts
                          // Difficulty in 2.25 should give 0.1562505f, will last 6 game days
                          // Difficulty in 0.001 should give 0.055555f, will last 14 days
                     float hungerdifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);
-                    NutritionLossPerTick = Mathf.Lerp(float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MDH"].ToString()), 0.208334f, hungerdifficulty);
+                    NutritionLossPerTick = Mathf.Lerp(float.Parse(ConfigFile.fConfigsFood["MDH"].ToString()), 0.208334f, hungerdifficulty);
                     break;
             }
             // Complete rewrite of base method Human.LifeNutrition
@@ -220,42 +220,42 @@ namespace PlantsnNutritionRebalance.Scripts
             /*float NormalizedHungerDifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);                
             float MaxHungerDays = Mathf.LerpUnclamped(13.6f, 4f, NormalizedHungerDifficulty);
             MaxHungerDays *= Settings.CurrentData.SunOrbitPeriod;
-            PlantsnNutritionRebalancePlugin.LogDebug($"NormalizedHungerDifficulty: {NormalizedHungerDifficulty} MaxHungerDays: {MaxHungerDays}");
+            ModLog.Debug($"NormalizedHungerDifficulty: {NormalizedHungerDifficulty} MaxHungerDays: {MaxHungerDays}");
 
 
 
             float NormalizedHydrationDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate - 1.5f) / (0.5f - 1.5f));
             float MaxHydrationDays = Mathf.LerpUnclamped(5f, 2.5f, NormalizedHydrationDifficulty);
             MaxHydrationDays *= Settings.CurrentData.SunOrbitPeriod;
-            PlantsnNutritionRebalancePlugin.LogDebug($"NormalizedHydrationDifficulty: {NormalizedHydrationDifficulty} MaxHydrationDays: {MaxHydrationDays}");*/
+            ModLog.Debug($"NormalizedHydrationDifficulty: {NormalizedHydrationDifficulty} MaxHydrationDays: {MaxHydrationDays}");*/
 
-            float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["DDM"].ToString());
+            float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * float.Parse(ConfigFile.fConfigsFood["DDM"].ToString());
 
             float Foodslice = __instance.MaxNutritionStorage / 200f; 
             float Hydrationslice = Human.MaxHydrationStorage / 200f;
             float Hydrationtogive;
 
-            PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch Dayspastnorm ---> " + Dayspastnorm);
+            ModLog.Debug("OnLifeCreatedPatch: RespawnPatch Dayspastnorm ---> " + Dayspastnorm);
 
             if (!isRespawn) 
             {
-              __instance.Nutrition = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Foodslice : float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString());
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
-                Hydrationtogive = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Hydrationslice : float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MHE"].ToString());
+              __instance.Nutrition = float.Parse(ConfigFile.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Foodslice : float.Parse(ConfigFile.fConfigsFood["MFE"].ToString());
+                ModLog.Debug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
+                Hydrationtogive = float.Parse(ConfigFile.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Hydrationslice : float.Parse(ConfigFile.fConfigsFood["MHE"].ToString());
             }
             else if(Dayspastnorm <= 195)
             {
                 // Calculate the food for respawn acordingly to the days past and SunOrbit
                 __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
+                ModLog.Debug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
                 Hydrationtogive = (200f - Dayspastnorm) * Hydrationslice;
             }
             else
             {
                 // give minimal food and water, so a respawned character have some time to eat and drink.
-                __instance.Nutrition = Math.Max(Foodslice * 3f, (__instance.MaxNutritionStorage * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFD"].ToString())) );
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition); 
-                Hydrationtogive = Math.Max(Hydrationslice * 5f, (Human.MaxHydrationStorage * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MHD"].ToString())) );
+                __instance.Nutrition = Math.Max(Foodslice * 3f, (__instance.MaxNutritionStorage * float.Parse(ConfigFile.fConfigsFood["MFD"].ToString())) );
+                ModLog.Debug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition); 
+                Hydrationtogive = Math.Max(Hydrationslice * 5f, (Human.MaxHydrationStorage * float.Parse(ConfigFile.fConfigsFood["MHD"].ToString())) );
             }
             Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);
             //TODO: Make it to calculate the food and hydration based also on the difficulty setting
@@ -270,7 +270,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float getFood(String __instance)
         {
 
-            PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
+            ModLog.Debug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
             if (typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")) != null)
             {
                 return float.Parse(((Dictionary<String, Object>)typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")).GetValue(PlantsnNutritionRebalancePlugin.Instance))["NUTV"].ToString());
@@ -280,7 +280,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         public static float getFoodEatSpeed(String __instance)
         {
-            PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
+            ModLog.Debug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
             if (typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")) != null)
             {
                 return float.Parse(((Dictionary<String, Object>)typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")).GetValue(PlantsnNutritionRebalancePlugin.Instance))["SEAT"].ToString());
@@ -303,20 +303,20 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 float tes = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
                 float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
-                if (tes >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
+                if (tes >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
                 {
-                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchFoodNutrition ---> EatSpeed : " + tes);
+                    ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> EatSpeed : " + tes);
                     __instance.EatSpeed = tes;
                 }
-                if (tf >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
+                if (tf >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
                 {
-                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchFoodNutrition ---> NutritionValue : " + tf);
+                    ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> NutritionValue : " + tf);
                     __instance.NutritionValue = tf;
                 }
             }
             catch (Exception ex)
             {
-                PlantsnNutritionRebalancePlugin.LogErro(ex);
+                ModLog.Error(ex);
             }
         }
     }
@@ -334,20 +334,20 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 float tes = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
                 float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
-                if (tes >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
+                if (tes >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
                 {
-                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchStackableNutrition ---> EatSpeed : " + tes);
+                    ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> EatSpeed : " + tes);
                     __instance.EatSpeed = tes;
                 }
-                if (tf >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
+                if (tf >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
                 {
-                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchStackableNutrition ---> NutritionValue : " + tf);
+                    ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> NutritionValue : " + tf);
                     __instance.NutritionValue = tf;
                 }
             }
             catch (Exception ex)
             {
-                PlantsnNutritionRebalancePlugin.LogErro(ex);
+                ModLog.Error(ex);
             }
         }
     }
@@ -363,15 +363,15 @@ namespace PlantsnNutritionRebalance.Scripts
             try
             {
                 float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
-                if (tf >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["PCE"].ToString()))
+                if (tf >= 0f && bool.Parse(ConfigFile.fConfigsFood["PCE"].ToString()))
                 {
-                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchPlantNutrition ---> NutritionValue : " + tf);
+                    ModLog.Debug("FoodsValuesPatch: PatchPlantNutrition ---> NutritionValue : " + tf);
                     __instance.NutritionValue = tf;
                 }
             }
             catch (Exception ex)
             {
-                PlantsnNutritionRebalancePlugin.LogErro(ex);
+                ModLog.Error(ex);
             }
         }
     }
@@ -386,23 +386,23 @@ namespace PlantsnNutritionRebalance.Scripts
         private static bool AddNutrition(ref Thing prefab, ref StationpediaPage page)
         {
             Food food = prefab as Food;
-            if (food != null && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
+            if (food != null && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
             {
                 food.NutritionValue = FoodsValuesPatch.getFood(food.DisplayName);
-                PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + food.NutritionValue);
+                ModLog.Debug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + food.NutritionValue);
             }
             StackableFood stackableFood = prefab as StackableFood;
-            if (stackableFood != null && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
+            if (stackableFood != null && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
             {
                 stackableFood.NutritionValue = FoodsValuesPatch.getFood(stackableFood.DisplayName);
-                PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + stackableFood.NutritionValue);
+                ModLog.Debug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + stackableFood.NutritionValue);
             }
 
             Plant Plantfood = prefab as Plant;
-            if (Plantfood != null && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["PCE"].ToString()))
+            if (Plantfood != null && bool.Parse(ConfigFile.fConfigsFood["PCE"].ToString()))
             {
                 Plantfood.NutritionValue = FoodsValuesPatch.getFood(Plantfood.DisplayName);
-                PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + Plantfood.NutritionValue);
+                ModLog.Debug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + Plantfood.NutritionValue);
             }
             return true;
         }
