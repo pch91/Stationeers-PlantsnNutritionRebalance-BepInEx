@@ -76,6 +76,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         private ConfigEntry<float> configPlantWaterConsumptionMultiplier;
         private ConfigEntry<float> configPlantWaterConsumptionLimit;
+        private ConfigEntry<float> configPlantWaterCurve;
         private ConfigEntry<float> configPlantWaterTranspirationPercentage;
         private ConfigEntry<float> configAtmosphereFogThreshold;
 
@@ -197,6 +198,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
+        public static float PlantWatercurve;
         public static float PlantWaterTranspirationPercentage;
         public static float AtmosphereFogThreshold;
 
@@ -224,7 +226,15 @@ namespace PlantsnNutritionRebalance.Scripts
                  "Limit the max consumption of water mols per tick a plant can drink. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks\n" +
                  "considerably more water than the other plants. Should be set to a positive float value"); // Description of the option to show in the config file
 
+            configPlantWaterCurve = Config.Bind("1 - Plants Configuration",
+                   "WaterReturnCurve",
+                   500f,
+                   "defines the water return curve.\n every 10 increases or decreases 0.1 more less \n Only accept values between 0 and 50 000 " +
+                   "");
+
+
             PlantWaterConsumptionLimit = Mathf.Clamp(configPlantWaterConsumptionLimit.Value, 0.000001f, 100000f);
+            PlantWatercurve = Mathf.Clamp(configPlantWaterCurve.Value, 0f, 50000f);
 
             configPlantWaterTranspirationPercentage = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterTranspirationPercentage",  // The key of the configuration option in the configuration file

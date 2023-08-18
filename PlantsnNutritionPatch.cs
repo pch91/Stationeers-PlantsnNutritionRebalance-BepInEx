@@ -11,6 +11,7 @@ using System.Reflection;
 using System;
 using System.Collections.Generic;
 using Object = System.Object;
+using static Assets.Scripts.Atmospherics.AtmosphereHelper;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -27,10 +28,44 @@ namespace PlantsnNutritionRebalance.Scripts
                 return;
             else
             {
+                
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> HasAtmosphere " + __instance.ReferenceId +" - "+ __instance.HasAtmosphere);
+                if (__instance.ThermalAtmosphere!= null) {
+                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> Temperature " + __instance.ReferenceId + " - " + __instance.ThermalAtmosphere.Temperature);
+                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PressureGassesAndLiquids " + __instance.ReferenceId + " - " + __instance.ThermalAtmosphere.PressureGassesAndLiquids);
+                }
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PlantStatus.TemperatureEfficiency " + __instance.ReferenceId + " - " + __instance.PlantStatus.TemperatureEfficiency); //curva montada no jogo em porcentagem 0 ~ 1 de eficiencia em presao adequada
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> PlantStatus.PressureEfficiency  " + __instance.ReferenceId + " - " + __instance.PlantStatus.PressureEfficiency); //curva montada no jogo em porcentagem 0 ~ 1 de eficiencia em presao adequada
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere PressureGassesAndLiquidsInPa " + __instance.ReferenceId + " - " + __instance.BreathingAtmosphere.PressureGassesAndLiquidsInPa);
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere Temperature " + __instance.ReferenceId + " - " + __instance.BreathingAtmosphere.Temperature);
+
+                if (__instance.InternalAtmosphere != null) {
+                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> TotalMolesLiquids " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.TotalMolesLiquids);
+                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> TotalMolesGases " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.TotalMolesGases);
+                    PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> Pressure " + __instance.ReferenceId + " - " + __instance.InternalAtmosphere.Pressure(MatterState.All));
+                }
+                float TQ = 0.5f;
+                float midealtemp = __instance.lifeRequirements.MaxGrowPressure().CurrentValue;
+                float midealpresure = __instance.lifeRequirements.MinGrowTemperatureK().CurrentValue;
+                float waterporcentage = (PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage/100f) * 0.9f;
+                float y1 = Mathf.Pow(Mathf.Pow(TQ, -1 / 10), 
+                    ((__instance.BreathingAtmosphere.Temperature - midealtemp) 
+                    / (Mathf.Pow((__instance.BreathingAtmosphere.Temperature - midealtemp) , -1) 
+                    * PlantsnNutritionRebalancePlugin.PlantWatercurve)));
+                float y2 = Mathf.Pow(Mathf.Pow(TQ, -1 / 10), 
+                    ((__instance.BreathingAtmosphere.PressureGassesAndLiquidsInPa - midealpresure) 
+                    / (Mathf.Pow((__instance.BreathingAtmosphere.PressureGassesAndLiquidsInPa - midealpresure) , -1)
+                    * PlantsnNutritionRebalancePlugin.PlantWatercurve)));
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere y1 Temperature" + __instance.ReferenceId + " - " + y1);
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere y2 PressureGassesAndLiquidsInPa" + __instance.ReferenceId + " - " + y2);
+
+
                 GasMixture gasMixture = GasMixtureHelper.Create();
-                float transpirationvalue = (__result / 100) * PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage;
-                gasMixture.Add(new Mole(Chemistry.GasType.Water, transpirationvalue * 0.1f, 0f));
-                gasMixture.Add(new Mole(Chemistry.GasType.Steam, transpirationvalue * 0.9f, 0f));
+                float transpirationvalue = __result * ((y1+y2)/2);
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: TakePlantDrinkPatch  ---> BreathingAtmosphere y2 transpirationvalue" + __instance.ReferenceId + " - " + transpirationvalue);
+
+                gasMixture.Add(new Mole(Chemistry.GasType.Water, transpirationvalue * waterporcentage, 0f));
+                gasMixture.Add(new Mole(Chemistry.GasType.Steam, transpirationvalue * (0.9f - waterporcentage), 0f));
                 gasMixture.AddEnergy(__instance.ParentTray.WaterAtmosphere.Temperature * gasMixture.HeatCapacity);
                 __instance.BreathingAtmosphere.Add(gasMixture);
             }
